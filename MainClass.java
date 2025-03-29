@@ -1,73 +1,66 @@
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.Scanner; // Mengimpor kelas Scanner untuk membaca input dari pengguna
 
 public class MainClass {
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        HashMap<String, Akun> akunMap = new HashMap<>();
-
-        // Menambahkan beberapa akun contoh dengan nomor pelanggan 8 digit
-        akunMap.put("38123456", new Akun("rere", "38123456", 5000000, "4569"));
-        akunMap.put("56123456", new Akun("sila", "56123456", 2000000, "8123"));
-        akunMap.put("74123456", new Akun("renaz", "74123456", 3000000, "7465"));
-
-        // Meminta input nomor pelanggan
-        System.out.print("Masukkan nomor pelanggan: ");
-        String nomor = scanner.next();
-        Akun akun = akunMap.get(nomor);
-
-        // Jika nomor pelanggan tidak ditemukan
-        if (akun == null) {
+        Scanner scanner = new Scanner(System.in); // Membuat objek Scanner untuk menerima input dari pengguna
+        
+        // Membuat array dari objek Akun dengan 3 akun yang memiliki nama, nomor pelanggan, saldo, dan PIN
+        Akun[] akunList = {
+            new Akun("Raihanah", "7892541298", 5000000, "8543"),
+            new Akun("Celacl", "8125469872", 2000000, "7895"),
+            new Akun("Vidynr", "0124987354", 3000000, "6541")
+        };
+        
+        System.out.print("Masukkan nomor pelanggan: "); // Meminta pengguna memasukkan nomor pelanggan
+        String nomor = scanner.next(); // Membaca nomor pelanggan dari input pengguna
+        
+        Akun akun = null; // Variabel untuk menyimpan akun yang cocok dengan nomor pelanggan
+        for (Akun a : akunList) { // Loop untuk mencari akun dengan nomor pelanggan yang sesuai
+            if (a.getNomorPelanggan().equals(nomor)) { // Mengecek apakah nomor pelanggan cocok
+                akun = a; // Jika cocok, menyimpan akun ke variabel 'akun'
+                break; // Keluar dari loop setelah menemukan akun
+            }
+        }
+        
+        if (akun == null) { // Jika akun tidak ditemukan, menampilkan pesan dan menghentikan program
             System.out.println("Nomor pelanggan tidak ditemukan!");
-            return;
+            scanner.close(); // Menutup Scanner untuk menghindari kebocoran sumber daya
+            return; // Menghentikan eksekusi program
         }
 
-        // Periksa apakah akun sudah diblokir sebelum meminta PIN
-        if (akun.isDiblokir()) {
-            System.out.println("Akun ini telah diblokir dan tidak bisa digunakan.");
-            return;
-        }
-
-        // Looping autentikasi PIN (maksimal 3 kali)
-        boolean isAuthenticated = false;
-        for (int i = 0; i < 3; i++) {
-            System.out.print("Masukkan PIN: ");
-            String pin = scanner.next();
-            if (akun.autentikasi(pin)) {
-                isAuthenticated = true;
-                break;
+        boolean autentikasi = false; // Variabel untuk menyimpan status autentikasi
+        for (int i = 0; i < 3; i++) { // Loop maksimal 3 kali untuk memasukkan PIN
+            System.out.print("Masukkan PIN: "); // Meminta pengguna memasukkan PIN
+            String pin = scanner.next(); // Membaca PIN dari input pengguna
+            if (akun.autentikasi(pin)) { // Mengecek apakah PIN benar dengan metode autentikasi di kelas Akun
+                autentikasi = true; // Jika benar, set autentikasi menjadi true
+                break; // Keluar dari loop karena autentikasi berhasil
             }
         }
 
-        // Jika gagal autentikasi 3 kali, akun diblokir
-        if (!isAuthenticated) {
-            System.out.println("Autentikasi gagal! Akun diblokir.");
-            return;
+        if (!autentikasi) { // Jika setelah 3 kali percobaan autentikasi gagal
+            System.out.println("Autentikasi gagal! Akun diblokir."); // Menampilkan pesan kegagalan
+            scanner.close(); // Menutup Scanner
+            return; // Menghentikan eksekusi program
         }
 
-        // Looping menu transaksi
-        while (true) {
-            System.out.println("\n=== MENU TRANSAKSI ===");
-            System.out.println("1. Beli Barang");
-            System.out.println("2. Top-Up Saldo");
-            System.out.println("3. Keluar");
-            System.out.print("Pilih menu: ");
-            int pilihan = scanner.nextInt();
+        // Jika autentikasi berhasil, masuk ke menu transaksi
+        while (true) { // Loop terus menerus sampai program dihentikan secara manual
+            System.out.println("\n=== MENU TRANSAKSI ==="); // Menampilkan menu transaksi
+            System.out.println("1. Pembelian"); // Opsi pertama: pembelian
+            System.out.println("2. Top-Up Saldo"); // Opsi kedua: menambah saldo
+            System.out.print("Pilih menu: "); // Meminta pengguna memilih menu
+            int pilihan = scanner.nextInt(); // Membaca pilihan menu dari input pengguna
 
-            if (pilihan == 3) {
-                System.out.println("Terima kasih! Program selesai.");
-                break;
-            }
+            System.out.print("Masukkan jumlah: "); // Meminta pengguna memasukkan jumlah transaksi
+            int jumlah = scanner.nextInt(); // Membaca jumlah transaksi dari input pengguna
 
-            System.out.print("Masukkan jumlah: ");
-            int jumlah = scanner.nextInt();
-
-            if (pilihan == 1) {
-                TransaksiPengguna.beli(akun, jumlah);
-            } else if (pilihan == 2) {
-                TransaksiPengguna.topUp(akun, jumlah);
-            } else {
-                System.out.println("Pilihan tidak valid!");
+            if (pilihan == 1) { // Jika pengguna memilih opsi 1 (pembelian)
+                TransaksiPengguna.beli(akun, jumlah); // Memanggil metode beli pada kelas TransaksiPengguna
+            } else if (pilihan == 2) { // Jika pengguna memilih opsi 2 (top-up saldo)
+                TransaksiPengguna.topUp(akun, jumlah); // Memanggil metode topUp pada kelas TransaksiPengguna
+            } else { // Jika pengguna memasukkan pilihan yang tidak valid
+                System.out.println("Pilihan tidak valid!"); // Menampilkan pesan error
             }
         }
     }
